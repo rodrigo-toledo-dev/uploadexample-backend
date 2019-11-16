@@ -8,6 +8,16 @@ const storageTypes = {
   local: multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, path.resolve(__dirname, '..', '..', 'tmp', 'uploads'));
+    },
+    filename: (req, file, cb) => {
+      console.log(file);
+      crypto.randomBytes(16, (err, hash) => {
+        if (err) cb(err);
+
+        file.key = `${hash.toString('hex')}-${file.originalname}`;
+
+        cb(null, file.key);
+      });
     }
   }),
   s3: multerS3({
@@ -29,7 +39,7 @@ const storageTypes = {
 
 module.exports = {
   dest: path.resolve(__dirname, '..', '..', 'tmp', 'uploads'),
-  storage: storageTypes['s3'],
+  storage: storageTypes['local'],
   limits: {
     fileSize: 2 * 1024 * 1024
   },
